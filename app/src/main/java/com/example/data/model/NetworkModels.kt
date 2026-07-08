@@ -12,19 +12,19 @@ data class LoginRequest(
 
 @JsonClass(generateAdapter = true)
 data class LoginResponse(
-    @Json(name = "accessToken") val accessToken: String,
-    @Json(name = "refreshToken") val refreshToken: String
+    @Json(name = "access_token") val accessToken: String,
+    @Json(name = "refresh_token") val refreshToken: String
 )
 
 @JsonClass(generateAdapter = true)
 data class RefreshRequest(
-    @Json(name = "refreshToken") val refreshToken: String
+    @Json(name = "refresh_token") val refreshToken: String
 )
 
 @JsonClass(generateAdapter = true)
 data class RefreshResponse(
-    @Json(name = "accessToken") val accessToken: String,
-    @Json(name = "refreshToken") val refreshToken: String
+    @Json(name = "access_token") val accessToken: String,
+    @Json(name = "refresh_token") val refreshToken: String
 )
 
 @JsonClass(generateAdapter = true)
@@ -73,4 +73,12 @@ data class SaleItem(
     @Json(name = "codValue") val codValue: Double? = null,
     @Json(name = "type") val type: String? = null,
     @Json(name = "items") val items: List<WarrantyDetails>? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class SalesSummaryResponse(
+    @Json(name = "revenue") val revenue: Double,
+    @Json(name = "profit") val profit: Double,
+    @Json(name = "totalSales") val totalSales: Int,
+    @Json(name = "itemsSold") val itemsSold: Int
 )

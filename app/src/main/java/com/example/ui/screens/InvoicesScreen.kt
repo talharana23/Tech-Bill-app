@@ -360,7 +360,7 @@ fun formatAmount(amount: Double): String {
 fun formatIsoDateTime(isoStr: String): String {
     return try {
         val cleanStr = isoStr.replace("Z", "+0000")
-        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT)
+        val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ROOT)
         val date = parser.parse(cleanStr) ?: return isoStr
         val formatter = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.ROOT)
         formatter.format(date)

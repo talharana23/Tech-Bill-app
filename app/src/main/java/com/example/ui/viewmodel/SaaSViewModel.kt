@@ -33,21 +33,28 @@ class SaaSViewModel(
     private val _loginError = MutableStateFlow<String?>(null)
     val loginError: StateFlow<String?> = _loginError.asStateFlow()
 
-    // Screen States
-    private val _lowStockItems = MutableStateFlow<List<InventoryItem>>(emptyList())
-    val lowStockItems: StateFlow<List<InventoryItem>> = _lowStockItems.asStateFlow()
+    // Screen States from Offline DB
+    val lowStockItems: StateFlow<List<InventoryItem>> = repository.getInventoryFlow()
+        .map { it.filter { item -> item.quantity <= 5 } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     private val _lowStockLoading = MutableStateFlow(false)
     val lowStockLoading: StateFlow<Boolean> = _lowStockLoading.asStateFlow()
 
-    private val _recentSales = MutableStateFlow<List<SaleItem>>(emptyList())
-    val recentSales: StateFlow<List<SaleItem>> = _recentSales.asStateFlow()
+    val recentSales: StateFlow<List<SaleItem>> = repository.getSalesFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     private val _salesLoading = MutableStateFlow(false)
     val salesLoading: StateFlow<Boolean> = _salesLoading.asStateFlow()
 
-    private val _onlineSales = MutableStateFlow<List<SaleItem>>(emptyList())
-    val onlineSales: StateFlow<List<SaleItem>> = _onlineSales.asStateFlow()
+    val onlineSales: StateFlow<List<SaleItem>> = repository.getOnlineSalesFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     private val _onlineSalesLoading = MutableStateFlow(false)
     val onlineSalesLoading: StateFlow<Boolean> = _onlineSalesLoading.asStateFlow()
+
+    private val _salesSummary = MutableStateFlow<com.example.data.model.SalesSummaryResponse?>(null)
+    val salesSummary: StateFlow<com.example.data.model.SalesSummaryResponse?> = _salesSummary.asStateFlow()
 
     private val _isSyncing = MutableStateFlow(false)
     val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
@@ -74,8 +81,7 @@ class SaaSViewModel(
             _isSyncing.value = true
             val profileResult = repository.syncProfile()
             if (profileResult.isFailure) {
-                // If sync determines subscription is expired or revoked, profile sync automatically logs out.
-                // Otherwise, it might be a standard network timeout, which we survive gracefully.
+                // Ignore for now
             }
             fetchDashboardAndInvoicesData()
             _isSyncing.value = false
@@ -85,37 +91,23 @@ class SaaSViewModel(
     private fun fetchDashboardAndInvoicesData() {
         viewModelScope.launch {
             _lowStockLoading.value = true
-            val lowStockRes = repository.getLowStockItems()
-            if (lowStockRes.isSuccess) {
-                _lowStockItems.value = lowStockRes.getOrNull() ?: emptyList()
-            } else {
-                // Populate default low stock items for visual brilliance if network/sandbox is down
-                _lowStockItems.value = getMockLowStockItems()
-            }
+            repository.fetchInventoryFromServer()
             _lowStockLoading.value = false
         }
 
         viewModelScope.launch {
             _salesLoading.value = true
-            val salesRes = repository.getRecentSales(10)
-            if (salesRes.isSuccess) {
-                _recentSales.value = salesRes.getOrNull() ?: emptyList()
-            } else {
-                // Fallback to high-fidelity mock sales
-                _recentSales.value = getMockSales()
-            }
+            _onlineSalesLoading.value = true
+            repository.fetchSalesFromServer()
             _salesLoading.value = false
+            _onlineSalesLoading.value = false
         }
 
         viewModelScope.launch {
-            _onlineSalesLoading.value = true
-            val onlineSalesRes = repository.getOnlineSales()
-            if (onlineSalesRes.isSuccess) {
-                _onlineSales.value = onlineSalesRes.getOrNull() ?: emptyList()
-            } else {
-                _onlineSales.value = getMockOnlineSales()
+            val summaryRes = repository.getSalesSummary()
+            if (summaryRes.isSuccess) {
+                _salesSummary.value = summaryRes.getOrNull()
             }
-            _onlineSalesLoading.value = false
         }
     }
 

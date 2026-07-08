@@ -29,4 +29,12 @@ interface ApiService {
         @Query("limit") limit: Int? = null,
         @Query("type") type: String? = null
     ): List<SaleItem>
+
+    @POST("sales")
+    suspend fun createSale(
+        @Body request: SaleItem
+    ): SaleItem
+
+    @GET("reports/sales-summary")
+    suspend fun getSalesSummary(): SalesSummaryResponse
 }

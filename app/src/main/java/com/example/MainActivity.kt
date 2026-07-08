@@ -22,8 +22,9 @@ class MainActivity : ComponentActivity() {
         // Manual Clean Dependency Injection Assembly
         val tokenManager = TokenManager(applicationContext)
         val apiService = RetrofitClient.createApiService(applicationContext, tokenManager)
-        val repository = SaaSDataRepository(apiService, tokenManager)
-        val factory = SaaSViewModelFactory(repository)
+        val database = com.example.data.local.AppDatabase.getDatabase(applicationContext)
+        val repository = SaaSDataRepository(apiService, tokenManager, database)
+        val factory = com.example.ui.viewmodel.SaaSViewModelFactory(repository)
         viewModel = ViewModelProvider(this, factory)[SaaSViewModel::class.java]
 
         enableEdgeToEdge()

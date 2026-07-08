@@ -117,7 +117,9 @@ fun DashboardScreen(
             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
         )
 
-        // Metrics Grid (2-column layout implemented with FlowRows or custom column pairs for vertical scrolling optimization)
+        val salesSummary by viewModel.salesSummary.collectAsState()
+
+        // Metrics Grid
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -130,17 +132,17 @@ fun DashboardScreen(
             ) {
                 MetricCard(
                     title = "Today's Revenue",
-                    value = "Rs 25,000",
+                    value = salesSummary?.revenue?.let { "Rs $it" } ?: "Rs 0",
                     accentColor = AccentCyan,
-                    subtitle = "+12% from yesterday",
+                    subtitle = "Real-time sync",
                     icon = Icons.Default.TrendingUp,
                     modifier = Modifier.weight(1f)
                 )
                 MetricCard(
                     title = "Gross Profit",
-                    value = "Rs 22,000",
+                    value = salesSummary?.profit?.let { "Rs $it" } ?: "Rs 0",
                     accentColor = AccentGreen,
-                    subtitle = "88% profit margin",
+                    subtitle = "Calculated margin",
                     icon = Icons.Default.TrendingUp,
                     modifier = Modifier.weight(1f)
                 )
@@ -152,16 +154,16 @@ fun DashboardScreen(
             ) {
                 MetricCard(
                     title = "Total Sales",
-                    value = "2",
+                    value = salesSummary?.totalSales?.toString() ?: "0",
                     accentColor = Color.White,
-                    subtitle = "2 orders completed",
+                    subtitle = "Orders completed",
                     modifier = Modifier.weight(1f)
                 )
                 MetricCard(
                     title = "Items Sold",
-                    value = "2",
+                    value = salesSummary?.itemsSold?.toString() ?: "0",
                     accentColor = Color.White,
-                    subtitle = "Average 1 item/order",
+                    subtitle = "Items delivered",
                     modifier = Modifier.weight(1f)
                 )
             }
